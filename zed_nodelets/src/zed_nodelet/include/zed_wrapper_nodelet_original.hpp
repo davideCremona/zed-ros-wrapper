@@ -72,7 +72,6 @@
 #include <sensor_msgs/point_cloud2_iterator.h>
 #include <stereo_msgs/DisparityImage.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#include <zed_interfaces/ObjectDetectionBoxArray.h>
 
 #include <condition_variable>
 #include <memory>
@@ -255,11 +254,6 @@ protected:
    * \param stat : node status
    */
     void callback_updateDiagnostic(diagnostic_updater::DiagnosticStatusWrapper& stat);
-
-    /*! \brief Callback to receive zed_interfaces::BoundingBox2DiArray topics
-   * \param msg : pointer to the received message
-   */
-    void customBoxObjectsCallback(const zed_interfaces::ObjectDetectionBoxArray::ConstPtr &msg);
 
     /*! \brief Callback to receive geometry_msgs::PointStamped topics
    * \param msg : pointer to the received message
@@ -735,7 +729,6 @@ private:
     sl::DETECTION_MODEL mObjDetModel = sl::DETECTION_MODEL::MULTI_CLASS_BOX;
 
     ros::Publisher mPubObjDet;
-    ros::Subscriber mSubInboundCustomBoxObjects;
 }; // class ZEDROSWrapperNodelet
 } // namespace zed_nodelets
 

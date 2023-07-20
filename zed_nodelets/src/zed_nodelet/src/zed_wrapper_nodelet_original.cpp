@@ -32,10 +32,7 @@
 
 #include "zed_interfaces/Object.h"
 #include "zed_interfaces/ObjectsStamped.h"
-#include "zed_interfaces/ObjectDetectionBoxArray.h"
 #include <zed_interfaces/PlaneStamped.h>
-
-#include "sl_tools.h"
 
 //#define DEBUG_SENS_TS 1
 
@@ -147,7 +144,6 @@ void ZEDWrapperNodelet::onInit()
 
     std::string object_det_topic_root = "obj_det";
     std::string object_det_topic = object_det_topic_root + "/objects";
-    std::string object_det_custom_box_topic = object_det_topic_root + "/inbound_custom_box_objects";
 
     std::string confImgRoot = "confidence";
     std::string conf_map_topic_name = "confidence_map";
@@ -471,13 +467,6 @@ void ZEDWrapperNodelet::onInit()
     if (mObjDetEnabled) {
         mPubObjDet = mNhNs.advertise<zed_interfaces::ObjectsStamped>(object_det_topic, 1);
         NODELET_INFO_STREAM("Advertised on topic " << mPubObjDet.getTopic());
-
-        if (mObjDetModel == sl::DETECTION_MODEL::CUSTOM_BOX_OBJECTS) {
-            mSubInboundCustomBoxObjects = mNhNs.subscribe(object_det_custom_box_topic, 100, 
-                &ZEDWrapperNodelet::customBoxObjectsCallback, this
-            );
-            NODELET_INFO_STREAM("Subscribed to topic: " << mSubInboundCustomBoxObjects.getTopic());
-        }
     }
 
     // Odometry and Pose publisher
@@ -4392,16 +4381,7 @@ void ZEDWrapperNodelet::processDetectedObjects(ros::Time t)
     for (auto data : objects.object_list) {
         objMsg->objects[idx].label = sl::toString(data.label).c_str();
         objMsg->objects[idx].sublabel = sl::toString(data.sublabel).c_str();
-
-        // we use raw_label instead of data.id to forward class information from the original
-        // model.
-        
-        objMsg->objects[idx].label_id = data.raw_label;
-        objMsg->objects[idx].instance_id = data.id;
-        
-        // original code:
-        // objMsg->objects[idx].label_id = data.id;
-        
+        objMsg->objects[idx].label_id = data.id;
         objMsg->objects[idx].confidence = data.confidence;
 
         memcpy(&(objMsg->objects[idx].position[0]), &(data.position[0]), 3 * sizeof(float));
@@ -4717,34 +4697,6 @@ void ZEDWrapperNodelet::clickedPtCallback(geometry_msgs::PointStampedConstPtr ms
         mPubPlane.publish(planeMsg);
         // <---- Publish the plane as custom message
     }
-}
-
-void ZEDWrapperNodelet::customBoxObjectsCallback(const zed_interfaces::ObjectDetectionBoxArray::ConstPtr &msg)
-{
-    // NODELET_INFO_STREAM("Received " << msg->objects.size() << " custom boxes");
-    std::vector<sl::CustomBoxObjectData> objects_in;
-    for (auto &it : msg->objects) {
-        sl::CustomBoxObjectData tmp;
-
-        // Fill the detections into the correct SDK format
-        tmp.unique_object_id = sl::generate_unique_id();
-        tmp.probability = it.confidence;
-        tmp.label = (int) it.label_id;
-        tmp.bounding_box_2d = sl_tools::cvtBoxMsg(it.bounding_box_2d);
-        tmp.is_grounded = true;
-        objects_in.push_back(tmp);
-
-        // NODELET_INFO_STREAM("\nunique_object_id: " << tmp.unique_object_id 
-        //                     << "\nprobability: " << tmp.probability
-        //                     << "\nlabel: " << tmp.label
-        //                     << "\nclass: " << it.label
-        //                     << "\ngrounded: " << tmp.is_grounded
-        //                     << "\nbox: A=(" << tmp.bounding_box_2d[0][0] << ", " << tmp.bounding_box_2d[0][1] << "), "
-        //                     << "B=(" << tmp.bounding_box_2d[1][0] << ", " << tmp.bounding_box_2d[1][1] << "), "
-        //                     << "C=(" << tmp.bounding_box_2d[2][0] << ", " << tmp.bounding_box_2d[2][1] << "), "
-        //                     << "D=(" << tmp.bounding_box_2d[3][0] << ", " << tmp.bounding_box_2d[3][1] << ")");
-    }
-    mZed.ingestCustomBoxObjects(objects_in);
 }
 
 } // namespace zed_nodelets

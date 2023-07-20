@@ -23,6 +23,7 @@
 
 #include <ros/time.h>
 #include <sensor_msgs/Image.h>
+#include <zed_interfaces/BoundingBox2Di.h>
 #include <sl/Camera.hpp>
 #include <string>
 #include <vector>
@@ -84,6 +85,10 @@ void imagesToROSmsg(sensor_msgs::ImagePtr imgMsgPtr, sl::Mat left, sl::Mat right
 /*! \brief String tokenization
  */
 std::vector<std::string> split_string(const std::string& s, char seperator);
+
+/*! \brief conversion from zed_interfaces/BoundingBox2Di to SDK format
+ */
+std::vector<sl::uint2> cvtBoxMsg(const zed_interfaces::BoundingBox2Di &box_in);
 
 /*!
  * \brief The CSmartMean class is used to
