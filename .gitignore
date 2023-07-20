@@ -41,3 +41,4 @@ CMakeLists.txt.user*
 *vscode*
 
 test_workspace
+test_run
