@@ -90,6 +90,8 @@ set(RGBD_SENS_DEMUX_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/rgbd_sensors_demux_nodel
 
 # add by drb
 set(SIMPLE_IMG_SUB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/simple_img_sub_nodelet/src/simple_img_sub.cpp)
+set(YOLOV3_OBJ_DET_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/yolov3_obj_det_nodelet/src/yolov3_obj_det.cpp)
+
 ###############################################################################
 
 ###############################################################################
@@ -106,6 +108,7 @@ set(INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/rgbd_sensors_demux_nodelet/include
     # add by drb
     ${CMAKE_CURRENT_SOURCE_DIR}/src/simple_img_sub_nodelet/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/yolov3_obj_det_nodelet/include
     ${OpenCV_INCLUDE_DIRS}
 )
 
@@ -133,6 +136,7 @@ add_library(ZEDNodelets
     ${RGBD_SENS_DEMUX_SRC}
     #add by drb
     ${SIMPLE_IMG_SUB_SRC}
+    ${YOLOV3_OBJ_DET_SRC}
 )
 target_include_directories(ZEDNodelets PRIVATE ${INCLUDE_DIRS})
 target_link_libraries(ZEDNodelets ${LINK_LIBRARIES})

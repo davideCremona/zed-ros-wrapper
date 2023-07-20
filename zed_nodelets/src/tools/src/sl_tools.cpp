@@ -412,6 +412,15 @@ std::vector<std::string> split_string(const std::string& s, char seperator)
   return output;
 }
 
+std::vector<sl::uint2> cvtBoxMsg(const zed_interfaces::BoundingBox2Di &box_in){
+  std::vector<sl::uint2> box_out(4);
+  box_out[0] = sl::uint2(box_in.corners[0].kp[0], box_in.corners[0].kp[1]);
+  box_out[1] = sl::uint2(box_in.corners[1].kp[0], box_in.corners[1].kp[1]);
+  box_out[2] = sl::uint2(box_in.corners[2].kp[0], box_in.corners[2].kp[1]);
+  box_out[3] = sl::uint2(box_in.corners[3].kp[0], box_in.corners[3].kp[1]);
+  return box_out;
+}
+
 CSmartMean::CSmartMean(int winSize)
 {
   mValCount = 0;

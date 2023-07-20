@@ -22,4 +22,11 @@
            base_class_type="nodelet::Nodelet">
       <description>Demo nodelet to subscribe an image topic </description>
     </class>
+
+    <class name="zed_nodelets/Yolov3ObjDetNodelet"
+           type="zed_nodelets::Yolov3ObjDetNodelet"
+           base_class_type="nodelet::Nodelet">
+      <description>Object Detection with YoloV3</description>
+    </class>
+    
 </library>
