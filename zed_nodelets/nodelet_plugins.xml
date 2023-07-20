@@ -16,4 +16,10 @@
            base_class_type="nodelet::Nodelet">
       <description>This is the nodelet for ZED Camera to demux messages synchronized with `zed_nodelets/RgbdSensorsSyncNodelet`.</description>
     </class>
+
+    <class name="zed_nodelets/SimpleImageSubNodelet"
+           type="zed_nodelets::SimpleImageSubNodelet"
+           base_class_type="nodelet::Nodelet">
+      <description>Demo nodelet to subscribe an image topic </description>
+    </class>
 </library>

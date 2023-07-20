@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.5)
 
 project(zed_nodelets)
 
+set(CMAKE_CXX_STANDARD 17)
+
 # if CMAKE_BUILD_TYPE is not specified, take 'Release' as default
 IF(NOT CMAKE_BUILD_TYPE)
     SET(CMAKE_BUILD_TYPE Release)
@@ -37,6 +39,8 @@ if (OPENMP_FOUND)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
+
+find_package( OpenCV REQUIRED )
 
 find_package(catkin REQUIRED COMPONENTS
     roscpp
@@ -84,6 +88,8 @@ set(ZED_NODELET_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/zed_nodelet/src/zed_wrapper_
 set(RGBD_SENS_SYNC_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/rgbd_sensors_sync_nodelet/src/rgbd_sensor_sync.cpp)
 set(RGBD_SENS_DEMUX_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/rgbd_sensors_demux_nodelet/src/rgbd_sensor_demux.cpp)
 
+# add by drb
+set(SIMPLE_IMG_SUB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/simple_img_sub_nodelet/src/simple_img_sub.cpp)
 ###############################################################################
 
 ###############################################################################
@@ -98,6 +104,9 @@ set(INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/zed_nodelet/include
     ${CMAKE_CURRENT_SOURCE_DIR}/src/rgbd_sensors_sync_nodelet/include
     ${CMAKE_CURRENT_SOURCE_DIR}/src/rgbd_sensors_demux_nodelet/include
+    # add by drb
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/simple_img_sub_nodelet/include
+    ${OpenCV_INCLUDE_DIRS}
 )
 
 link_directories(${ZED_LIBRARY_DIR})
@@ -113,6 +122,7 @@ set(LINK_LIBRARIES
   ${catkin_LIBRARIES}
   ${ZED_LIBRARIES}
   ${CUDA_LIBRARIES}
+  ${OpenCV_LIBS}
   stdc++fs
 )
 
@@ -121,6 +131,8 @@ add_library(ZEDNodelets
     ${ZED_NODELET_SRC}
     ${RGBD_SENS_SYNC_SRC}
     ${RGBD_SENS_DEMUX_SRC}
+    #add by drb
+    ${SIMPLE_IMG_SUB_SRC}
 )
 target_include_directories(ZEDNodelets PRIVATE ${INCLUDE_DIRS})
 target_link_libraries(ZEDNodelets ${LINK_LIBRARIES})
