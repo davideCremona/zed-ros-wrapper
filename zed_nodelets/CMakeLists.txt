@@ -42,6 +42,18 @@ endif()
 
 find_package( OpenCV REQUIRED )
 
+
+# Set the paths to TensorRT include and library directories
+set(TENSORRT_INCLUDE_DIR "/usr/include/aarch64-linux-gnu")
+set(TENSORRT_LIBRARY_DIR "/usr/lib/aarch64-linux-gnu")
+# Check if TensorRT directories exist
+if(NOT EXISTS "${TENSORRT_INCLUDE_DIR}" OR NOT EXISTS "${TENSORRT_LIBRARY_DIR}")
+    message(FATAL_ERROR "TensorRT directories not found. Please set TENSORRT_INCLUDE_DIR and TENSORRT_LIBRARY to the correct paths.")
+endif()
+
+
+
+
 find_package(catkin REQUIRED COMPONENTS
     roscpp
     image_transport
@@ -110,6 +122,7 @@ set(INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/simple_img_sub_nodelet/include
     ${CMAKE_CURRENT_SOURCE_DIR}/src/yolov3_obj_det_nodelet/include
     ${OpenCV_INCLUDE_DIRS}
+    ${TENSORRT_INCLUDE_DIR}
 )
 
 link_directories(${ZED_LIBRARY_DIR})
@@ -126,6 +139,10 @@ set(LINK_LIBRARIES
   ${ZED_LIBRARIES}
   ${CUDA_LIBRARIES}
   ${OpenCV_LIBS}
+  ${TENSORRT_LIBRARY_DIR}/libnvinfer.so
+  ${TENSORRT_LIBRARY_DIR}/libnvinfer_plugin.so
+  ${TENSORRT_LIBRARY_DIR}/libnvonnxparser.so
+  ${TENSORRT_LIBRARY_DIR}/libnvparsers.so
   stdc++fs
 )
 

@@ -16,6 +16,24 @@
 // messages
 #include <sensor_msgs/Image.h>
 
+// trt
+#include <NvInfer.h>
+#include <NvInferRuntimeCommon.h>
+
+#include <cv_bridge/cv_bridge.h>
+
+
+class Logger : public nvinfer1::ILogger
+{
+public:
+    void log(Severity severity, const char* msg) override {
+        // remove this 'if' if you need more logged info
+        if ((severity == Severity::kERROR) || (severity == Severity::kINTERNAL_ERROR)) {
+            std::cout << msg << std::endl;
+        }
+    }
+} gLogger;
+
 // define the nodelet inside a namespace
 namespace zed_nodelets
 {
@@ -35,13 +53,32 @@ namespace zed_nodelets
       void imgCallback(const sensor_msgs::ImageConstPtr &msg);
 
     private:
+
+      // helper functions
+      std::string readEngineFile();
       // Node handlers
       ros::NodeHandle mNh;   // Node handler
       ros::NodeHandle mNhP;  // Private Node handler
 
+      // Node flags
+      bool nodeletInitialized = false;
+
       // image transport
       std::shared_ptr<image_transport::ImageTransport> it_;
       image_transport::Subscriber image_sub_;
+
+      // model params
+      std::string engine_path;
+      int batchSize;
+      int inputW;
+      int inputH;
+      int inputC;
+
+      // trt stuffs
+      // todo: using smart pointers makes me cry. I'm using raw ptrs. Is it safe? Do I have to del?
+      nvinfer1::IRuntime *trtRuntime;
+      nvinfer1::ICudaEngine *trtEngine;
+      nvinfer1::IExecutionContext *trtContext;
 
   };
 }  // namespace zed_nodelets
