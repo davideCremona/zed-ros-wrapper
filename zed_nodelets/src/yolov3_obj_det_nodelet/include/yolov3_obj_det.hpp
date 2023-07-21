@@ -21,6 +21,7 @@
 #include <NvInferRuntimeCommon.h>
 
 #include <cv_bridge/cv_bridge.h>
+#include <opencv4/opencv2/opencv.hpp>
 
 
 class Logger : public nvinfer1::ILogger
@@ -56,6 +57,8 @@ namespace zed_nodelets
 
       // helper functions
       std::string readEngineFile();
+      cv::Mat preprocessImage(const cv_bridge::CvImageConstPtr &cv_ptr);
+
       // Node handlers
       ros::NodeHandle mNh;   // Node handler
       ros::NodeHandle mNhP;  // Private Node handler

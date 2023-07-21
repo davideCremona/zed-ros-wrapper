@@ -90,14 +90,19 @@ namespace zed_nodelets
     cv_bridge::CvImageConstPtr cv_ptr;
     try {
       cv_ptr = cv_bridge::toCvShare(msg, sensor_msgs::image_encodings::BGR8);
+      NODELET_INFO_STREAM("Image Orig size: " << cv_ptr->image.cols << "x" << cv_ptr->image.rows);
     } 
     catch (cv_bridge::Exception& e) {
       NODELET_ERROR_STREAM("cv_bridge exception: " << e.what());
       return;
     }
 
+    // preprocess image
+    cv::Mat inputImage = preprocessImage(cv_ptr);
+    NODELET_INFO_STREAM("Procedded image size: (" << inputImage.cols << ", " << inputImage.rows << ")");
+
     // show image
-    cv::imshow("OPENCV_WINDOW", cv_ptr->image);
+    cv::imshow("OPENCV_WINDOW", inputImage);
     cv::waitKey(1);
   }
 
@@ -112,4 +117,39 @@ namespace zed_nodelets
     buffer << file.rdbuf();
     return buffer.str();
   }
+
+  cv::Mat Yolov3ObjDetNodelet::preprocessImage(const cv_bridge::CvImageConstPtr &cv_ptr) {
+    int new_h = cv_ptr->image.rows;
+    int new_w = cv_ptr->image.cols;
+
+    // Determine the new size of the image
+    if (static_cast<float>(inputW) / new_w < static_cast<float>(inputH) / new_h) {
+        new_h = (new_h * inputW) / new_w;
+        new_w = inputW;
+    } else {
+        new_w = (new_w * inputH) / new_h;
+        new_h = inputH;
+    }
+
+    // Resize the image to the new size
+    cv::Mat resized_image;
+    cv::resize(cv_ptr->image, resized_image, cv::Size(new_w, new_h));
+
+    // Convert color from BGR to RGB
+    cv::Mat image_rgb;
+    cv::cvtColor(resized_image, image_rgb, cv::COLOR_BGR2RGB);
+
+    // Convert image to float and normalize
+    image_rgb.convertTo(image_rgb, CV_32FC3);
+    image_rgb /= 255.0f;
+
+    // Embed the image into the standard letterbox
+    cv::Mat new_image = cv::Mat::ones(inputH, inputW, CV_32FC3) * 0.5f;
+    new_image.setTo(cv::Scalar(0.5f, 0.5f, 0.5f));
+    cv::Rect roi((inputW - new_w) / 2, (inputH - new_h) / 2, new_w, new_h);
+    image_rgb.copyTo(new_image(roi));
+
+    return std::move(new_image);
+  }
+
 }  // namespace zed_nodelets
