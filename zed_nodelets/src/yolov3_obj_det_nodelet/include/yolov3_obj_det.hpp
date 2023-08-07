@@ -19,9 +19,15 @@
 // trt
 #include <NvInfer.h>
 #include <NvInferRuntimeCommon.h>
+#include <cuda_runtime_api.h>
+#include <device_launch_parameters.h>
 
 #include <cv_bridge/cv_bridge.h>
 #include <opencv4/opencv2/opencv.hpp>
+
+#include <Eigen/Dense>
+
+using namespace Eigen;
 
 
 class Logger : public nvinfer1::ILogger
@@ -34,6 +40,7 @@ public:
         }
     }
 } gLogger;
+
 
 // define the nodelet inside a namespace
 namespace zed_nodelets
@@ -71,11 +78,36 @@ namespace zed_nodelets
       image_transport::Subscriber image_sub_;
 
       // model params
-      std::string engine_path;
+      const int NUM_BOXES = 3;  // yolov3 predicts 3 boxes for each grid cell
+      const int NUM_VALS_PER_BOX = 5; // x, y, w, h and confidence
+      std::string enginePath;
       int batchSize;
       int inputW;
       int inputH;
       int inputC;
+      std::vector<std::vector<int>> outputShapes;
+      int numClasses;
+      std::vector<int> gridDims;
+      std::vector<int> anchorBoxes;
+
+      // static inference helpers
+      MatrixXd gridIdcsTensor;
+      VectorXd gridDimsTensor;
+      MatrixXd anchorsTensor;
+
+      // inference
+      cv::Mat inputImg;
+      size_t inputSize;
+      void *inputBuffer;
+      std::vector<size_t> outputSizes;
+      std::vector<void*> outputBuffers;
+      std::vector<void*> buffers;
+
+      //decoding
+      // number of elements in corresponding buffer per image
+      int nbElementsPerBox;
+      std::vector<int> nbElemsPerBuffer;
+      std::vector<int> nbBoxesPerBuffer;
 
       // trt stuffs
       // todo: using smart pointers makes me cry. I'm using raw ptrs. Is it safe? Do I have to del?

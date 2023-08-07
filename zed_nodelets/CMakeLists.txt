@@ -42,6 +42,8 @@ endif()
 
 find_package( OpenCV REQUIRED )
 
+find_package (Eigen3 3.3 REQUIRED NO_MODULE)
+
 
 # Set the paths to TensorRT include and library directories
 set(TENSORRT_INCLUDE_DIR "/usr/include/aarch64-linux-gnu")
@@ -102,7 +104,11 @@ set(RGBD_SENS_DEMUX_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/rgbd_sensors_demux_nodel
 
 # add by drb
 set(SIMPLE_IMG_SUB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/simple_img_sub_nodelet/src/simple_img_sub.cpp)
-set(YOLOV3_OBJ_DET_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/yolov3_obj_det_nodelet/src/yolov3_obj_det.cpp)
+set(YOLOV3_OBJ_DET_SRC 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/yolov3_obj_det_nodelet/src/yolov3_obj_det.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/yolov3_obj_det_nodelet/src/eigen_to_string.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/yolov3_obj_det_nodelet/src/helper_tensors_creation.cpp
+)
 
 ###############################################################################
 
@@ -123,6 +129,7 @@ set(INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/yolov3_obj_det_nodelet/include
     ${OpenCV_INCLUDE_DIRS}
     ${TENSORRT_INCLUDE_DIR}
+    ${EIGEN_INCLUDE_DIR}
 )
 
 link_directories(${ZED_LIBRARY_DIR})
@@ -143,6 +150,7 @@ set(LINK_LIBRARIES
   ${TENSORRT_LIBRARY_DIR}/libnvinfer_plugin.so
   ${TENSORRT_LIBRARY_DIR}/libnvonnxparser.so
   ${TENSORRT_LIBRARY_DIR}/libnvparsers.so
+  Eigen3::Eigen
   stdc++fs
 )
 
